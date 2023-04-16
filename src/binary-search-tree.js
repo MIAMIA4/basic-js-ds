@@ -47,24 +47,19 @@ class BinarySearchTree {
   }
 
   has(data) {
-    const queue = [this.r]
-    while(queue.length){
-      const node = queue.shift()
-      
+    function find(currentNode){
+      if(currentNode == null){
+          return false
+      } else if(currentNode.data === data){
+          return true
+      } else if(currentNode.data > data){
+          return find(currentNode.left)
+      } else {
+          return find(currentNode.right)
+      }
+  } 
+  return find(this.r)
 
-      if(node.left){
-        queue.push(node.left)
-      }
-
-      if(node.right){
-        queue.push(node.right)
-      }
-      if(data == node.data) {
-        return true
-      }
-    }
-    
-    return false
   }
 
   find(data) {
@@ -84,116 +79,120 @@ class BinarySearchTree {
 
 }  
 
-  remove(data) {
-    function recFindDel(currentNode, prevNode){
+remove(data) {
+    
+  function recDelFind(currentNode, prevNode){
       if(currentNode == null){
           return null
-      } else if(currentNode.data === data){
+      } 
+      if(currentNode.data == data){
           return {node: currentNode, prev: prevNode}
-      } else if(currentNode.data > data){
-          return recFindDel(currentNode.left, currentNode)
+      }
+      if(currentNode.data > data){
+          return recDelFind(currentNode.left, currentNode)
       } else {
-          return recFindDel(currentNode.right, currentNode)
+          return recDelFind(currentNode.right, currentNode)
       }
   } 
 
   function deleteWOChild(node, prev){
-      if(!prev){
-          this.r = null
+    if(prev == null){
+      this.r = null
+    } else {
+      if(prev.left == node){
+        prev.left = null
       } else {
-          if(prev.left == node){
-              prev.left = null
-          } else {
-              prev.right = null
-          }
+        prev.right = null
       }
+    }
   }
 
   function deleteOneChild(node, prev){
-      let child
-      if(node.left){
-          child = node.left
+    let newNode = null
+    if(node.left){
+      newNode = node.left
+    } else if(node.right){
+      newNode = node.right
+    }
+    if(prev == null) {
+      this.r = newNode
+    } else {
+      if(prev.left == node){
+        prev.left = newNode
       } else {
-          child = node.right
+        prev.right = newNode
       }
-      if(!prev) {
-          this.r = child
-      } else {
-          if(prev.left == node){
-              prev.left = child
-          } else {
-              prev.right = child
-          }
-      }
+    }
   }
 
   function deleteTwoChild(node, prev){
-      let prevChild = node
-      let child = node.left
-      if(child.right){
-          while(child.right){
-              prevChild = child
-              child = child.right
-          }
+    let prevResult = node
+    let result = node.left
+    if(result.right){
+      while(result.right){
+        prevResult = result
+        result = result.right
       }
+    }
 
-      deleteOneChild.call(this, child)
+    deleteOneChild.call(this, result, prevResult)
 
-      let leftChild = node.left
-      let rightChild = node.right
-
-      if(!prev){
-          child.left = leftChild
-          child.right = rightChild
-          this.r = child
+    let leftNodeChild = node.left
+    let rightNodeChild = node.right
+    if(prev == null){
+      result.left = leftNodeChild
+      result.right = rightNodeChild
+      this.r = result
+    } else {
+      if(prev.left == node){
+        result.left = leftNodeChild
+        result.right = rightNodeChild
+        prev.left = result
       } else {
-          if(prev.left == node){
-              child.left = leftChild
-              child.right = rightChild
-              prev.left = child
-          } else {
-              child.left = leftChild
-              child.right = rightChild
-              prev.left = child
-          }
+        result.left = leftNodeChild
+        result.right = rightNodeChild
+        prev.right = result
       }
+    }
   }
 
-  let del = recFindDel(this.r, null)
-  let node = del.node
-  let prev = del.prev
+  let result = recDelFind(this.r, null)
+  let node = result.node
+  let prev = result.prev
 
   if(!node.left && !node.right){
-      deleteWOChild.call(this, node, prev)
-  } else if (!node.left && node.right || node.left && !node.right){
-      deleteOneChild.call(this, node, prev)
+    deleteWOChild.call(this, node, prev)
+  } else if(!node.left && node.right || node.left && !node.right){
+    deleteOneChild.call(this, node, prev)
   } else {
-      deleteTwoChild.call(this, node, prev)
+    deleteTwoChild.call(this, node, prev)
   }
-  }
+}  
 
-  min() {
-    const queue = [this.r]
-    while(queue.length){
-      const node = queue.shift()
-      if(node.left){
-        queue.push(node.left)
-      } else {
-        return node.data
-      }
-    }  
-  }
+min() {
+  function minFind(currentNode){
+    if(currentNode == null){
+        return null
+    } else if(currentNode.left){
+        return minFind(currentNode.left)
+    } else {
+      return currentNode.data
+    }
+  } 
+  return minFind(this.r)
+}
 
   max() {
-    const queue = [this.r]
-    while(queue.length){
-      const node = queue.shift()
-      if(node.right){
-        queue.push(node.right)
+    function maxFind(currentNode){
+      if(currentNode == null){
+          return null
+      } else if(currentNode.right){
+          return maxFind(currentNode.right)
       } else {
-        return node.data
+        return currentNode.data
       }
-    }  
+    } 
+    return maxFind(this.r)
   }
 }
 
